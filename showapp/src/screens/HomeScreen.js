@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,30 +10,34 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-
-const SHOWS_MOCK = [
-  {
-    id: "1",
-    nome: "Rock in Rio 2025",
-    genero: "Rock",
-    data: "15 Set",
-    local: "Rio de Janeiro",
-    imagem:
-      "https://images.unsplash.com/photo-1459749411177-042180ce673c?w=500",
-  },
-  {
-    id: "2",
-    nome: "Lollapalooza Brasil",
-    genero: "Pop/Rock",
-    data: "22 Mar",
-    local: "São Paulo",
-    imagem:
-      "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500",
-  },
-];
+import { useFocusEffect } from "@react-navigation/native"; // <-- Importante para recarregar
+import api from "../services/api"; // <-- Nossa conexão
 
 export default function HomeScreen({ navigation }) {
   const [busca, setBusca] = useState("");
+  const [shows, setShows] = useState([]); // Agora começa vazio!
+
+  // Função para buscar no banco de dados
+  const carregarShows = async () => {
+    try {
+      const response = await api.get("/shows");
+      setShows(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar shows: ", error);
+    }
+  };
+
+  // Recarrega a lista sempre que a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      carregarShows();
+    }, []),
+  );
+
+  // Filtro de busca local
+  const showsFiltrados = shows.filter((show) =>
+    show.nome.toLowerCase().includes(busca.toLowerCase()),
+  );
 
   const renderShowCard = ({ item }) => (
     <TouchableOpacity
@@ -84,12 +88,12 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <FlatList
-          data={SHOWS_MOCK}
-          keyExtractor={(item) => item.id}
+          data={showsFiltrados}
+          keyExtractor={(item) => String(item.id)}
           renderItem={renderShowCard}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Nenhum show encontrado</Text>
+            <Text style={styles.emptyText}>Nenhum show cadastrado ainda.</Text>
           }
         />
       </View>
@@ -98,14 +102,8 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#0B0B14",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
+  safeArea: { flex: 1, backgroundColor: "#0B0B14" },
+  container: { flex: 1, paddingHorizontal: 20 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -113,11 +111,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 24,
   },
-  title: {
-    color: "#FFF",
-    fontSize: 28,
-    fontWeight: "bold",
-  },
+  title: { color: "#FFF", fontSize: 28, fontWeight: "bold" },
   notificationBtn: {
     backgroundColor: "#161622",
     padding: 10,
@@ -136,12 +130,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2A2A35",
   },
-  searchInput: {
-    flex: 1,
-    color: "#FFF",
-    marginLeft: 10,
-    fontSize: 16,
-  },
+  searchInput: { flex: 1, color: "#FFF", marginLeft: 10, fontSize: 16 },
   card: {
     flexDirection: "row",
     alignItems: "center",
@@ -152,15 +141,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2A2A35",
   },
-  cardImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-  },
-  cardInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
+  cardImage: { width: 70, height: 70, borderRadius: 12 },
+  cardInfo: { flex: 1, marginLeft: 16 },
   badge: {
     backgroundColor: "rgba(184, 41, 234, 0.1)",
     alignSelf: "flex-start",
@@ -169,29 +151,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 4,
   },
-  badgeText: {
-    color: "#B829EA",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
+  badgeText: { color: "#B829EA", fontSize: 10, fontWeight: "bold" },
   cardTitle: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 4,
   },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardFooterText: {
-    color: "#8E8E93",
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  emptyText: {
-    color: "#8E8E93",
-    textAlign: "center",
-    marginTop: 50,
-  },
+  cardFooter: { flexDirection: "row", alignItems: "center" },
+  cardFooterText: { color: "#8E8E93", fontSize: 12, marginLeft: 4 },
+  emptyText: { color: "#8E8E93", textAlign: "center", marginTop: 50 },
 });

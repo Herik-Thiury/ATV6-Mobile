@@ -11,13 +11,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function DetalheShowScreen({ route, navigation }) {
-  // Recebendo os dados do show que foi clicado na Home!
   const { show } = route.params;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Imagem de Destaque com Botão Voltar sobreposto */}
         <View style={styles.bannerContainer}>
           <Image source={{ uri: show.imagem }} style={styles.bannerImage} />
           <TouchableOpacity
@@ -34,7 +32,6 @@ export default function DetalheShowScreen({ route, navigation }) {
         <View style={styles.content}>
           <Text style={styles.title}>{show.nome}</Text>
 
-          {/* Informações Rápidas */}
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Ionicons name="calendar-outline" size={20} color="#8E8E93" />
@@ -47,8 +44,7 @@ export default function DetalheShowScreen({ route, navigation }) {
             <View style={styles.infoItem}>
               <Ionicons name="time-outline" size={20} color="#8E8E93" />
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoValue}>19:00</Text>{" "}
-                {/* Fixo por enquanto, no MOCK não tem hora */}
+                <Text style={styles.infoValue}>19:00</Text>
                 <Text style={styles.infoLabel}>Horário</Text>
               </View>
             </View>
@@ -62,7 +58,6 @@ export default function DetalheShowScreen({ route, navigation }) {
             </View>
           </View>
 
-          {/* Botões de Ação */}
           <View style={styles.actionsRow}>
             <TouchableOpacity style={styles.actionButton}>
               <Ionicons name="pencil-outline" size={22} color="#B829EA" />

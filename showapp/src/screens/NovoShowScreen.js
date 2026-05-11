@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import api from "../services/api";
 
 const CLOUD_NAME = "dmzdsr0af";
 const UPLOAD_PRESET = "aula7_ReactNative";
@@ -38,7 +39,7 @@ export default function NovoShowScreen({ navigation }) {
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"], 
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [16, 9],
       quality: 0.7,
@@ -82,7 +83,8 @@ export default function NovoShowScreen({ navigation }) {
     }
   };
 
-  const handleSalvarShow = () => {
+  const handleSalvarShow = async () => {
+    // <-- Transformamos em async
     if (!nome || !data || !generoSelecionado || !imagemUri) {
       Alert.alert(
         "Atenção",
@@ -100,11 +102,16 @@ export default function NovoShowScreen({ navigation }) {
       imagem: imagemUri,
     };
 
-    console.log("Show a ser salvo:", novoShow);
+    try {
+      await api.post("/shows", novoShow);
 
-    Alert.alert("Sucesso", "Show cadastrado com sucesso!", [
-      { text: "OK", onPress: () => navigation.goBack() },
-    ]);
+      Alert.alert("Sucesso", "Show cadastrado com sucesso!", [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível salvar o show no banco de dados.");
+      console.error(error);
+    }
   };
 
   return (
