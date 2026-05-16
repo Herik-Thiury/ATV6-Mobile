@@ -8,15 +8,55 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
 
 export default function CadastroScreen({ navigation }) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [carregando, setCarregando] = useState(false);
+
+  const handleCadastro = async () => {
+    if (!nome || !email || !senha || !confirmarSenha) {
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      return;
+    }
+
+    if (senha !== confirmarSenha) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
+
+    setCarregando(true);
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, senha);
+      Alert.alert("Sucesso", "Conta criada com sucesso!", [
+        { text: "OK", onPress: () => navigation.replace("MainApp") },
+      ]);
+    } catch (error) {
+      let mensagemErro = "Não foi possível realizar o cadastro.";
+
+      if (error.code === "auth/email-already-in-use") {
+        mensagemErro = "Este e-mail já está em uso.";
+      } else if (error.code === "auth/invalid-email") {
+        mensagemErro = "O formato do e-mail é inválido.";
+      } else if (error.code === "auth/weak-password") {
+        mensagemErro = "A senha deve ter pelo menos 6 caracteres.";
+      }
+
+      Alert.alert("Falha no Cadastro", mensagemErro);
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -116,9 +156,14 @@ export default function CadastroScreen({ navigation }) {
 
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => navigation.replace("MainApp")}
+              onPress={handleCadastro}
+              disabled={carregando}
             >
-              <Text style={styles.primaryButtonText}>Criar conta</Text>
+              {carregando ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.primaryButtonText}>Criar conta</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -137,51 +182,26 @@ export default function CadastroScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#0B0B14",
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-  },
+  safeArea: { flex: 1, backgroundColor: "#0B0B14" },
+  flex: { flex: 1 },
+  scrollContainer: { flexGrow: 1, paddingHorizontal: 24, paddingBottom: 20 },
   backButton: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
     marginBottom: 30,
   },
-  backButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  header: {
-    marginBottom: 30,
-  },
+  backButtonText: { color: "#FFFFFF", fontSize: 16, marginLeft: 8 },
+  header: { marginBottom: 30 },
   title: {
     color: "#FFFFFF",
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 8,
   },
-  subtitle: {
-    color: "#8E8E93",
-    fontSize: 16,
-  },
-  form: {
-    marginBottom: 20,
-  },
-  label: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: "500",
-  },
+  subtitle: { color: "#8E8E93", fontSize: 16 },
+  form: { marginBottom: 20 },
+  label: { color: "#FFFFFF", fontSize: 14, marginBottom: 8, fontWeight: "500" },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -193,14 +213,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2A2A35",
   },
-  icon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
+  icon: { marginRight: 12 },
+  input: { flex: 1, color: "#FFFFFF", fontSize: 16 },
   primaryButton: {
     backgroundColor: "#B829EA",
     borderRadius: 12,
@@ -210,22 +224,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 24,
   },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  footer: {
-    alignItems: "center",
-    marginTop: "auto",
-    paddingVertical: 20,
-  },
-  footerText: {
-    color: "#8E8E93",
-    fontSize: 14,
-  },
-  footerTextBold: {
-    color: "#B829EA",
-    fontWeight: "bold",
-  },
+  primaryButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
+  footer: { alignItems: "center", marginTop: "auto", paddingVertical: 20 },
+  footerText: { color: "#8E8E93", fontSize: 14 },
+  footerTextBold: { color: "#B829EA", fontWeight: "bold" },
 });

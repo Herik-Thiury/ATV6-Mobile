@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,46 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
 
 export default function PerfilScreen({ navigation }) {
-  const handleLogout = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
+  const [usuarioEmail, setUsuarioEmail] = useState("Carregando...");
+  const [usuarioNome, setUsuarioNome] = useState("Usuário");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUsuarioEmail(user.email);
+
+  
+        if (user.displayName) {
+          setUsuarioNome(user.displayName);
+        } else {
+          const nomeExtraido = user.email.split("@")[0];
+          setUsuarioNome(
+            nomeExtraido.charAt(0).toUpperCase() + nomeExtraido.slice(1),
+          );
+        }
+      } else {
+        navigation.replace("Login");
+      }
     });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
+    } catch (error) {
+      console.error("Erro ao deslogar: ", error);
+    }
   };
 
   return (
@@ -36,8 +69,8 @@ export default function PerfilScreen({ navigation }) {
               <Ionicons name="camera" size={16} color="#FFF" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>João Silva</Text>
-          <Text style={styles.email}>joao@email.com</Text>
+          <Text style={styles.name}>{usuarioNome}</Text>
+          <Text style={styles.email}>{usuarioEmail}</Text>
         </View>
 
         <View style={styles.statsContainer}>

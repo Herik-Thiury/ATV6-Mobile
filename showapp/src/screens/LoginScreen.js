@@ -7,16 +7,46 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  const handleLogin = () => {
-    navigation.replace("MainApp");
+  const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert("Erro", "Por favor, preencha o e-mail e a senha.");
+      return;
+    }
+
+    setCarregando(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      navigation.replace("MainApp");
+    } catch (error) {
+      let mensagemErro = "E-mail ou senha incorretos.";
+
+      if (error.code === "auth/invalid-email") {
+        mensagemErro = "O formato do e-mail é inválido.";
+      } else if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        mensagemErro = "Usuário ou senha inválidos.";
+      }
+
+      Alert.alert("Falha no Login", mensagemErro);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -73,8 +103,16 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-            <Text style={styles.primaryButtonText}>Entrar</Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleLogin}
+            disabled={carregando}
+          >
+            {carregando ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.primaryButtonText}>Entrar</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.dividerContainer}>
@@ -109,18 +147,9 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#0B0B14",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: "center",
-  },
-  header: {
-    marginBottom: 40,
-  },
+  safeArea: { flex: 1, backgroundColor: "#0B0B14" },
+  container: { flex: 1, paddingHorizontal: 24, justifyContext: "center" },
+  header: { marginBottom: 40 },
   logo: {
     color: "#B829EA",
     fontSize: 24,
@@ -133,19 +162,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
-  subtitle: {
-    color: "#8E8E93",
-    fontSize: 16,
-  },
-  form: {
-    marginBottom: 20,
-  },
-  label: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: "500",
-  },
+  subtitle: { color: "#8E8E93", fontSize: 16 },
+  form: { marginBottom: 20 },
+  label: { color: "#FFFFFF", fontSize: 14, marginBottom: 8, fontWeight: "500" },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -157,23 +176,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2A2A35",
   },
-  icon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    color: "#B829EA",
-    fontSize: 14,
-    fontWeight: "500",
-  },
+  icon: { marginRight: 12 },
+  input: { flex: 1, color: "#FFFFFF", fontSize: 16 },
+  forgotPassword: { alignSelf: "flex-end", marginBottom: 24 },
+  forgotPasswordText: { color: "#B829EA", fontSize: 14, fontWeight: "500" },
   primaryButton: {
     backgroundColor: "#B829EA",
     borderRadius: 12,
@@ -182,26 +188,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  primaryButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 24,
   },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#2A2A35",
-  },
-  dividerText: {
-    color: "#8E8E93",
-    paddingHorizontal: 16,
-    fontSize: 14,
-  },
+  divider: { flex: 1, height: 1, backgroundColor: "#2A2A35" },
+  dividerText: { color: "#8E8E93", paddingHorizontal: 16, fontSize: 14 },
   googleButton: {
     flexDirection: "row",
     backgroundColor: "#161622",
@@ -212,25 +206,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2A2A35",
   },
-  googleIcon: {
-    marginRight: 12,
-  },
-  googleButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  footer: {
-    alignItems: "center",
-    marginTop: "auto",
-    marginBottom: 20,
-  },
-  footerText: {
-    color: "#8E8E93",
-    fontSize: 14,
-  },
-  footerTextBold: {
-    color: "#B829EA",
-    fontWeight: "bold",
-  },
+  googleIcon: { marginRight: 12 },
+  googleButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "500" },
+  footer: { alignItems: "center", marginTop: "auto", marginBottom: 20 },
+  footerText: { color: "#8E8E93", fontSize: 14 },
+  footerTextBold: { color: "#B829EA", fontWeight: "bold" },
 });
