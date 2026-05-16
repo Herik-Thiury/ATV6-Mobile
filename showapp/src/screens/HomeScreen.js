@@ -10,14 +10,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native"; // <-- Importante para recarregar
-import api from "../services/api"; // <-- Nossa conexão
+import { useFocusEffect } from "@react-navigation/native"; 
+import api from "../services/api"; 
 
 export default function HomeScreen({ navigation }) {
   const [busca, setBusca] = useState("");
-  const [shows, setShows] = useState([]); // Agora começa vazio!
+  const [shows, setShows] = useState([]); 
 
-  // Função para buscar no banco de dados
   const carregarShows = async () => {
     try {
       const response = await api.get("/shows");
@@ -27,14 +26,12 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  // Recarrega a lista sempre que a tela ganha foco
   useFocusEffect(
     useCallback(() => {
       carregarShows();
     }, []),
   );
 
-  // Filtro de busca local
   const showsFiltrados = shows.filter((show) =>
     show.nome.toLowerCase().includes(busca.toLowerCase()),
   );

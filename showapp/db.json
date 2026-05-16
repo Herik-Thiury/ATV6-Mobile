@@ -1,15 +1,6 @@
 {
   "shows": [
     {
-      "nome": "Giorno",
-      "data": "17/10",
-      "hora": "25/10",
-      "local": "Recife",
-      "genero": "Rock",
-      "imagem": "https://res.cloudinary.com/dmzdsr0af/image/upload/v1778938853/vubfco1gj0ifg2zylzu5.jpg",
-      "id": "ga-HOxq3rVM"
-    },
-    {
       "nome": "Lola palooza",
       "data": "17/10",
       "hora": "22:00",

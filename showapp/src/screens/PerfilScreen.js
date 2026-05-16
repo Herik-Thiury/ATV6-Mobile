@@ -21,7 +21,6 @@ export default function PerfilScreen({ navigation }) {
       if (user) {
         setUsuarioEmail(user.email);
 
-  
         if (user.displayName) {
           setUsuarioNome(user.displayName);
         } else {
@@ -59,12 +58,19 @@ export default function PerfilScreen({ navigation }) {
       >
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{
-                uri: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500",
-              }}
-              style={styles.avatar}
-            />
+            <View
+              style={[
+                styles.avatar,
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#161622",
+                },
+              ]}
+            >
+              <Ionicons name="person" size={50} color="#4F4F5B" />
+            </View>
+
             <TouchableOpacity style={styles.editAvatarButton}>
               <Ionicons name="camera" size={16} color="#FFF" />
             </TouchableOpacity>

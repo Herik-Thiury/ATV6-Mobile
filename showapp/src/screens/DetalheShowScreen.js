@@ -6,12 +6,45 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import api from "../services/api";
 
 export default function DetalheShowScreen({ route, navigation }) {
   const { show } = route.params;
+
+  const handleExcluir = () => {
+    Alert.alert(
+      "Atenção",
+      `Tem certeza que deseja excluir o show "${show.nome}"?`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.delete(`/shows/${show.id}`);
+
+              Alert.alert("Sucesso", "Show excluído com sucesso!");
+              navigation.goBack();
+            } catch (error) {
+              console.error("Erro ao excluir: ", error);
+              Alert.alert(
+                "Erro",
+                "Não foi possível excluir o show. Verifique sua conexão.",
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -69,7 +102,10 @@ export default function DetalheShowScreen({ route, navigation }) {
               <Text style={styles.actionButtonText}>Compartilhar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleExcluir}
+            >
               <Ionicons name="trash-outline" size={22} color="#FF4D4D" />
               <Text style={[styles.actionButtonText, { color: "#FF4D4D" }]}>
                 Excluir
